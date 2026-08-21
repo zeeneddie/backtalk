@@ -77,6 +77,18 @@ def _ensure_espeak():
     for lib in candidates:
         if os.path.exists(lib):
             os.environ["PHONEMIZER_ESPEAK_LIBRARY"] = lib
+            # THE LIBRARY ALONE IS NOT ENOUGH. espeak-ng also needs its
+            # DATA directory, and the espeakng-loader wheel bakes in the
+            # path of the machine it was BUILT on
+            # (/home/runner/work/...). When that path is missing espeak
+            # does not raise — it calls exit(), killing the whole
+            # process. So point ESPEAK_DATA_PATH at a real one; it is
+            # the PARENT of the espeak-ng-data folder.
+            for parent in (os.path.dirname(lib), "/usr/share",
+                           "/usr/local/share", "/usr/lib"):
+                if os.path.isdir(os.path.join(parent, "espeak-ng-data")):
+                    os.environ.setdefault("ESPEAK_DATA_PATH", parent)
+                    break
             break
 
 

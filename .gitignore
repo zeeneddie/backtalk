@@ -10,3 +10,7 @@ uv.lock
 backtalk.egg-info/
 # your personal config, created at setup: never tracked, never touched by updates
 backtalk.json
+
+# run-artefacten
+install-cleanroom.log
+verify-*.log
