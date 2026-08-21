@@ -1,0 +1,16 @@
+# CUDA 12 runtime for ctranslate2 (faster-whisper), Linux + NVIDIA.
+#
+# WHY: ctranslate2 is built against CUDA 12 and dlopens libcublas.so.12.
+# Torch — pulled in by kokoro — ships the CUDA *13* runtime instead
+# (nvidia/cu13/lib holds libcublas.so.13), so a GPU box has the .13 and
+# not the .12. Adding cuBLAS 12 fixes that: different soname, no clash.
+#
+# WHAT IS DELIBERATELY *NOT* HERE: nvidia-cudnn-cu12.
+# Measured 2026-08-21: nvidia-cudnn-cu12 and nvidia-cudnn-cu13 install
+# to the SAME path (nvidia/cudnn/lib/libcudnn.so.9) — a straight file
+# collision where the last install wins. Adding the cu12 one leaves
+# torch running against foreign sublibraries and kokoro dies with
+# CUDNN_STATUS_SUBLIBRARY_VERSION_MISMATCH. cuDNN 9 keeps one soname
+# across both, so ctranslate2 happily uses the copy torch already
+# brought. One cuDNN per environment.
+nvidia-cublas-cu12

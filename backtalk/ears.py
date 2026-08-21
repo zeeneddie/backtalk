@@ -55,11 +55,17 @@ def warm():
     with _model_lock:
         if _model is None:
             from faster_whisper import WhisperModel
+            from backtalk.gpu import resolve
+            # PROVEN, not assumed: resolve() preloads the CUDA 12
+            # runtime ctranslate2 needs and transcribes real samples
+            # through the GPU before calling it usable. A model that
+            # merely LOADS on cuda still dies on the first sentence.
+            device, compute = resolve(CFG["stt_device"],
+                                      CFG["stt_compute"])
             log(f"[ears] loading {CFG['stt_model']} "
-                f"({CFG['stt_device']}/{CFG['stt_compute']})...")
-            _model = WhisperModel(CFG["stt_model"],
-                                  device=CFG["stt_device"],
-                                  compute_type=CFG["stt_compute"])
+                f"({device}/{compute})...")
+            _model = WhisperModel(CFG["stt_model"], device=device,
+                                  compute_type=compute)
             log("[ears] model ready")
     return _model
 
